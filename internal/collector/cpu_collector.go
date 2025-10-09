@@ -61,7 +61,8 @@ func (collector *CPUCollector) Collect(ch chan<- prometheus.Metric) {
 		return
 	}
 
-	for _, cpuTime := range cpuTimes {
+	if len(cpuTimes) > 0 && len(cpuPercent) > 0 {
+		cpuTime := cpuTimes[0]
 		ch <- prometheus.MustNewConstMetric(collector.cpuUsage, prometheus.GaugeValue, cpuPercent[0])
 		ch <- prometheus.MustNewConstMetric(collector.cpuUser, prometheus.GaugeValue, cpuTime.User)
 		ch <- prometheus.MustNewConstMetric(collector.cpuSystem, prometheus.GaugeValue, cpuTime.System)

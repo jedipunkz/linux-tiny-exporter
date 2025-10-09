@@ -66,7 +66,7 @@ func (collector *NetCollector) Collect(ch chan<- prometheus.Metric) {
 		}
 
 		fields := strings.Fields(line)
-		if len(fields) < 10 {
+		if len(fields) < 11 {
 			continue
 		}
 
@@ -76,27 +76,22 @@ func (collector *NetCollector) Collect(ch chan<- prometheus.Metric) {
 		receivedPackets, _ := strconv.ParseFloat(fields[2], 64)
 		transmitPackets, _ := strconv.ParseFloat(fields[10], 64)
 
-		if lastReceivedBytes, ok := collector.lastReceivedBytes[interfaceName]; ok {
-			receivedBytesDiff := receivedBytes - lastReceivedBytes
-			ch <- prometheus.MustNewConstMetric(collector.receivedBytesDiff, prometheus.GaugeValue, receivedBytesDiff, interfaceName)
-		}
-		if lastTransmitBytes, ok := collector.lastTransmitBytes[interfaceName]; ok {
-			transmitBytesDiff := transmitBytes - lastTransmitBytes
-			ch <- prometheus.MustNewConstMetric(collector.transmitBytesDiff, prometheus.GaugeValue, transmitBytesDiff, interfaceName)
-		}
-		if lastReceivedPackets, ok := collector.lastReceivedPackets[interfaceName]; ok {
-			receivedPacketsDiff := receivedPackets - lastReceivedPackets
-			ch <- prometheus.MustNewConstMetric(collector.receivedPacketsDiff, prometheus.GaugeValue, receivedPacketsDiff, interfaceName)
-		}
-		if lastTransmitPackets, ok := collector.lastTransmitPackets[interfaceName]; ok {
-			transmitPacketsDiff := transmitPackets - lastTransmitPackets
-			ch <- prometheus.MustNewConstMetric(collector.transmitPacketsDiff, prometheus.GaugeValue, transmitPacketsDiff, interfaceName)
-		}
+		collector.emitMetricDiff(ch, collector.receivedBytesDiff, collector.lastReceivedBytes, interfaceName, receivedBytes)
+		collector.emitMetricDiff(ch, collector.transmitBytesDiff, collector.lastTransmitBytes, interfaceName, transmitBytes)
+		collector.emitMetricDiff(ch, collector.receivedPacketsDiff, collector.lastReceivedPackets, interfaceName, receivedPackets)
+		collector.emitMetricDiff(ch, collector.transmitPacketsDiff, collector.lastTransmitPackets, interfaceName, transmitPackets)
 
 		collector.lastReceivedBytes[interfaceName] = receivedBytes
 		collector.lastTransmitBytes[interfaceName] = transmitBytes
 		collector.lastReceivedPackets[interfaceName] = receivedPackets
 		collector.lastTransmitPackets[interfaceName] = transmitPackets
+	}
+}
+
+func (collector *NetCollector) emitMetricDiff(ch chan<- prometheus.Metric, desc *prometheus.Desc, lastValues map[string]float64, interfaceName string, currentValue float64) {
+	if lastValue, ok := lastValues[interfaceName]; ok {
+		diff := currentValue - lastValue
+		ch <- prometheus.MustNewConstMetric(desc, prometheus.GaugeValue, diff, interfaceName)
 	}
 }
 
