@@ -1,6 +1,8 @@
 package collector
 
 import (
+	"log"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/shirou/gopsutil/disk"
 )
@@ -35,6 +37,7 @@ func (collector *DiskCollector) Describe(ch chan<- *prometheus.Desc) {
 func (collector *DiskCollector) Collect(ch chan<- prometheus.Metric) {
 	ioCounters, err := disk.IOCounters()
 	if err != nil {
+		log.Printf("Error getting disk I/O counters: %v", err)
 		return
 	}
 

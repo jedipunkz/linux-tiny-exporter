@@ -2,11 +2,16 @@ package collector
 
 import (
 	"io"
+	"log"
 	"os"
 	"strconv"
 	"strings"
 
 	"github.com/prometheus/client_golang/prometheus"
+)
+
+const (
+	netDeviceHeaderLines = 2 // Number of header lines to skip in /proc/net/dev
 )
 
 type NetCollector struct {
@@ -55,13 +60,14 @@ func (collector *NetCollector) Describe(ch chan<- *prometheus.Desc) {
 func (collector *NetCollector) Collect(ch chan<- prometheus.Metric) {
 	data, err := getNetDevice()
 	if err != nil {
+		log.Printf("Error reading network device data: %v", err)
 		return
 	}
 
 	lines := strings.Split(data, "\n")
 
 	for i, line := range lines {
-		if i < 2 {
+		if i < netDeviceHeaderLines {
 			continue
 		}
 

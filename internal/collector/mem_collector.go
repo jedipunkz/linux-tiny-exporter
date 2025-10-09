@@ -63,7 +63,7 @@ func (collector *MemCollector) Describe(ch chan<- *prometheus.Desc) {
 func (collector *MemCollector) Collect(ch chan<- prometheus.Metric) {
 	vMem, err := mem.VirtualMemory()
 	if err != nil {
-		log.Println(err)
+		log.Printf("Error getting memory info: %v", err)
 		return
 	}
 

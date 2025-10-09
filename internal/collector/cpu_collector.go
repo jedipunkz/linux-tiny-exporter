@@ -1,6 +1,8 @@
 package collector
 
 import (
+	"log"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/shirou/gopsutil/v3/cpu"
 )
@@ -53,11 +55,13 @@ func (collector *CPUCollector) Describe(ch chan<- *prometheus.Desc) {
 func (collector *CPUCollector) Collect(ch chan<- prometheus.Metric) {
 	cpuTimes, err := cpu.Times(false)
 	if err != nil {
+		log.Printf("Error getting CPU times: %v", err)
 		return
 	}
 
 	cpuPercent, err := cpu.Percent(0, false)
 	if err != nil {
+		log.Printf("Error getting CPU percent: %v", err)
 		return
 	}
 
