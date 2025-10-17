@@ -106,7 +106,11 @@ func getNetDevice() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
+	defer func() {
+		if closeErr := file.Close(); closeErr != nil {
+			log.Printf("Error closing /proc/net/dev: %v", closeErr)
+		}
+	}()
 
 	var sb strings.Builder
 	_, err = io.Copy(&sb, file)
