@@ -1,6 +1,8 @@
 package collector
 
 import (
+	"log"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/shirou/gopsutil/v3/host"
 )
@@ -26,6 +28,7 @@ func (collector *TempCollector) Describe(ch chan<- *prometheus.Desc) {
 func (collector *TempCollector) Collect(ch chan<- prometheus.Metric) {
 	temps, err := host.SensorsTemperatures()
 	if err != nil {
+		log.Printf("Error getting temperature sensors: %v", err)
 		return
 	}
 
