@@ -1,6 +1,6 @@
 module github.com/jedipunkz/linux-tiny-exporter
 
-go 1.20
+go 1.26.1
 
 require (
 	github.com/prometheus/client_golang v1.15.0
